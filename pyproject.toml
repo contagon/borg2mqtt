@@ -36,7 +36,9 @@ classifiers = [  # Optional
 ]
 
 dependencies = [
-  "paho-mqtt",
+  "paho-mqtt", 
+  "platformdirs", 
+  "python-slugify",
 ]
 
 [project.optional-dependencies]
@@ -51,3 +53,6 @@ test = ["pytest"]
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project.scripts]
+borgmqtt = "borgmqtt:run_borgmqtt"

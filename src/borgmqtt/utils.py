@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+from dataclasses import dataclass
 
 import paho.mqtt.client as paho
 
@@ -10,16 +11,31 @@ BROKER_USER = ""
 BROKER_PASSWORD = ""
 
 
-def get_repo_info(repo, key):
+@dataclass
+class RepoSettings:
+    repo: str
+    key: str
+    name: str
+
+
+@dataclass
+class MQTTSettings:
+    address: str = ""
+    port: int = 1883
+    user: str = ""
+    password: str = ""
+
+
+def get_repo_info(repo_settings: RepoSettings):
     """Get all info from borgmatic list & borgmatic info commands"""
     env = os.environ.copy()
-    env["BORG_PASSPHRASE"] = key
+    env["BORG_PASSPHRASE"] = repo_settings.key
 
     # Get info about all repos
     arguments = [
         "borg",
         "info",
-        repo,
+        repo_settings.repo,
         "--json",
     ]
     result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env)
@@ -30,7 +46,7 @@ def get_repo_info(repo, key):
     arguments = [
         "borg",
         "list",
-        repo,
+        repo_settings.repo,
         "--json",
     ]
     result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env)
@@ -61,7 +77,7 @@ def get_repo_info(repo, key):
     return info
 
 
-def connect_mqtt_client():
+def connect_mqtt_client(mqtt_settings: MQTTSettings):
     """CONNECT TO MQTT Broker"""
 
     def on_publish(client, userdata, mid):
@@ -80,8 +96,8 @@ def connect_mqtt_client():
         print(f"[BORGMQTT] Sent message to {topic}")
 
     client = paho.Client("backups")
-    client.username_pw_set(BROKER_USER, password=BROKER_PASSWORD)
-    client.connect(BROKER_ADDRESS, BROKER_PORT)
+    client.username_pw_set(mqtt_settings.user, password=mqtt_settings.password)
+    client.connect(mqtt_settings.address, mqtt_settings.port)
     # client.on_publish = on_publish
     client.on_log = on_log
     return client
