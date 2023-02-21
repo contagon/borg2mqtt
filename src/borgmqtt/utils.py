@@ -14,7 +14,7 @@ def get_repo_info(repo, key):
     """Get all info from borgmatic list & borgmatic info commands"""
     env = os.environ.copy()
     env["BORG_PASSPHRASE"] = key
-    
+
     # Get info about all repos
     arguments = [
         "borg",
@@ -42,22 +42,28 @@ def get_repo_info(repo, key):
         "id": repo_info["repository"]["id"],
         "chunks_unique": repo_info["cache"]["stats"]["total_unique_chunks"],
         "chunks_total": repo_info["cache"]["stats"]["total_chunks"],
-        "size_dedup": 
-            round(float(repo_info["cache"]["stats"]["unique_size"]) / 10**9, 2),
-        "size_dedup_comp": 
-            round(float(repo_info["cache"]["stats"]["unique_csize"]) / 10**9, 2),
-        "size_og": round(float(repo_info["cache"]["stats"]["total_size"]) / 10**12, 2),
-        "size_og_comp": 
-            round(float(repo_info["cache"]["stats"]["total_csize"]) / 10**12, 2),
+        "size_dedup": round(
+            float(repo_info["cache"]["stats"]["unique_size"]) / 10**9, 2
+        ),
+        "size_dedup_comp": round(
+            float(repo_info["cache"]["stats"]["unique_csize"]) / 10**9, 2
+        ),
+        "size_og": round(
+            float(repo_info["cache"]["stats"]["total_size"]) / 10**12, 2
+        ),
+        "size_og_comp": round(
+            float(repo_info["cache"]["stats"]["total_csize"]) / 10**12, 2
+        ),
         "num_backups": len(repo_list["archives"]),
-        "most_recent": repo_list["archives"][-1]["time"]+"-04:00",
+        "most_recent": repo_list["archives"][-1]["time"] + "-04:00",
     }
 
     return info
 
 
 def connect_mqtt_client():
-    """CONNECT TO MQTT Broker """
+    """CONNECT TO MQTT Broker"""
+
     def on_publish(client, userdata, mid):
         print("on_publish, mid {}".format(mid))
         print(client)
@@ -72,7 +78,6 @@ def connect_mqtt_client():
         end = buf.find("''")
         topic = buf[start:end]
         print(f"[BORGMQTT] Sent message to {topic}")
-
 
     client = paho.Client("backups")
     client.username_pw_set(BROKER_USER, password=BROKER_PASSWORD)
