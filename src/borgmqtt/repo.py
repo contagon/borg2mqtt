@@ -9,7 +9,7 @@ from slugify import slugify
 
 @dataclass
 class MQTTSettings:
-    address: str = ""
+    host: str = "localhost"
     port: int = 1883
     user: str = ""
     password: str = ""
@@ -30,8 +30,8 @@ class Repository:
         self.slug = slugify(self.name, separator="_")
         self.state_topic = f"borg/{self.slug}/state"
 
-    def _get_updates(self):
-        """Get all info from borgmatic list & borgmatic info commands"""
+    def _ask_borg(self, command):
+        """Poll borg for a response"""
 
         env = os.environ.copy()
         env["BORG_PASSPHRASE"] = self.key
@@ -39,24 +39,23 @@ class Repository:
         # Get info about all repos
         arguments = [
             "borg",
-            "info",
+            command,
             self.repo,
             "--json",
         ]
-        result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env)
-        repo_info = json.loads(result.stdout)
 
-        # Get list about all repos
-        arguments = [
-            "borg",
-            "list",
-            self.repo,
-            "--json",
-        ]
         result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env)
-        repo_list = json.loads(result.stdout)
+        result = json.loads(result.stdout)
+        return result
 
-        # Get all info we need from the info/list
+    def _get_updates(self):
+        """Get all info from borgmatic list & borgmatic info commands"""
+
+        # Ask borg for all info
+        repo_info = self._ask_borg("info")
+        repo_list = self._ask_borg("list")
+
+        # Parse through it all
         info = {
             "location": repo_info["repository"]["location"],
             "id": repo_info["repository"]["id"],
@@ -83,10 +82,10 @@ class Repository:
     def update(self, mqtt: MQTTSettings):
         """Send all updated info over MQTT"""
         info = self._get_updates()
-        publish(
+        publish.single(
             self.state_topic,
             payload=json.dumps(info),
-            hostname=mqtt.address,
+            hostname=mqtt.host,
             port=mqtt.port,
             auth={"username": mqtt.user, "password": mqtt.password},
             retain=True,
@@ -106,13 +105,26 @@ class Repository:
             "id": {"name": "ID"},
             "most_recent": {"name": "Timestamp", "device_class": "timestamp"},
             "num_backups": {"name": "Total Backups"},
-            "size_dedup": {"name": "Deduplicated Size", "unit_of_meas": "Gb"},
+            "size_dedup": {
+                "name": "Deduplicated Size",
+                "device_class": "data_size",
+                "unit_of_meas": "GB",
+            },
             "size_dedup_comp": {
                 "name": "Compressed Deduplicated Size",
-                "unit_of_meas": "Gb",
+                "device_class": "data_size",
+                "unit_of_meas": "GB",
             },
-            "size_og": {"name": "Original Size", "unit_of_meas": "Tb"},
-            "size_og_comp": {"name": "Original Compressed Size", "unit_of_meas": "Tb"},
+            "size_og": {
+                "name": "Original Size",
+                "device_class": "data_size",
+                "unit_of_meas": "TB",
+            },
+            "size_og_comp": {
+                "name": "Original Compressed Size",
+                "device_class": "data_size",
+                "unit_of_meas": "TB",
+            },
         }
 
         device = {
@@ -130,10 +142,10 @@ class Repository:
             payload["unique_id"] = f"{self.slug}_{key}"
             payload["value_template"] = f"{{{{value_json.{key}}}}}"
 
-            publish(
+            publish.single(
                 topic,
                 payload=json.dumps(payload),
-                hostname=mqtt.address,
+                hostname=mqtt.host,
                 port=mqtt.port,
                 auth={"username": mqtt.user, "password": mqtt.password},
                 retain=True,
