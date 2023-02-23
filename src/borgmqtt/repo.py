@@ -19,7 +19,7 @@ class MQTTSettings:
 @dataclass
 class Repository:
     repo: str
-    key: str
+    key: str = ""
     verbose: bool = False
     name: str = None
 

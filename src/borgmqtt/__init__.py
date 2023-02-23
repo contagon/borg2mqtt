@@ -28,12 +28,10 @@ def run_borgmqtt():
     )
 
     # ------------------------- Generate configuration file ------------------------- #
-    generate = subparsers.add_parser(
+    subparsers.add_parser(
         "generate",
         help="Generate sample config file, or make config file from borgmatic config.",
     )
-    generate.set_defaults(func=actions.generate)
-    generate.add_argument("--borgmatic", action="store_true")
 
     # ------------------------- Setup Device in HA ------------------------- #
     setup = subparsers.add_parser(
@@ -57,8 +55,11 @@ def run_borgmqtt():
 
     args = parser.parse_args()
 
-    repos, mqtt = actions.parse(args)
-    args.func(repos, mqtt)
+    if args.operation == "generate":
+        actions.generate(args.config)
+    else:
+        repos, mqtt = actions.parse(args)
+        args.func(repos, mqtt)
 
 
 if __name__ == "__main__":

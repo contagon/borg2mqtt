@@ -1,6 +1,28 @@
+import os
+
 import yaml
 
 from .repo import MQTTSettings, Repository
+
+EXAMPLE_CONFIG = """
+# ---------------- Sample configuration file ---------------- #
+# These are the default MQTT values - none are required
+mqtt:
+  host: localhost
+  port: 1883
+  user: ""
+  password: ""
+
+# Put in as many repositories as desired
+repos:
+    # Required
+  - repo: user@address:/path/to/backup
+    # Optional, efaults to the same as repo if not specified
+    # This will be used to make entity_ids in HA
+    name: Local Data
+    # Optional
+    key: ""
+"""
 
 
 def parse(args) -> tuple[list[Repository], MQTTSettings]:
@@ -27,8 +49,22 @@ def parse(args) -> tuple[list[Repository], MQTTSettings]:
     return repos, mqtt
 
 
-def generate(repos: list[Repository], mqtt: MQTTSettings):
-    print("generate")
+def generate(path: str):
+    # Make sure we're not overriding anything
+    if os.path.exists(path):
+        raise ValueError(
+            f"A file exists at {path} already, remove it to make a new one"
+        )
+
+    # Make directory to put config file in
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Save example config
+    print(f"[BORGMQTT] Making config file at {path}")
+    with open(path, "w") as f:
+        f.write(EXAMPLE_CONFIG)
 
 
 def setup(repos: list[Repository], mqtt: MQTTSettings):
