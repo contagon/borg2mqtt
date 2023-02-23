@@ -20,7 +20,7 @@ class MQTTSettings:
 class Repository:
     repo: str
     key: str = ""
-    verbose: bool = False
+    verbose: int = 0
     name: str = None
 
     def __post_init__(self):
@@ -46,13 +46,13 @@ class Repository:
             "--json",
         ]
 
-        if self.verbose:
+        if self.verbose >= 2:
             print(f"[BORGMQTT][{self.name}] Running {' '.join(arguments)}")
 
         result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env)
         result = json.loads(result.stdout)
 
-        if self.verbose:
+        if self.verbose >= 3:
             print("[BORGMQTT][{self.name}] Got back")
             pprint(result)
 
@@ -92,10 +92,14 @@ class Repository:
     def update(self, mqtt: MQTTSettings):
         """Send all updated info over MQTT"""
 
-        if self.verbose:
-            print(f"[BORGMQTT][{self.name}]Updating")
+        if self.verbose >= 1:
+            print(f"[BORGMQTT][{self.name}] Getting update information")
 
         info = self._get_updates()
+
+        if self.verbose >= 1:
+            print(f"[BORGMQTT][{self.name}] Sending MQTT update")
+
         publish.single(
             self.state_topic,
             payload=json.dumps(info),
@@ -108,8 +112,8 @@ class Repository:
     def setup(self, mqtt: MQTTSettings):
         """Send MQTT autodiscovery message"""
 
-        if self.verbose:
-            print(f"[BORGMQTT][{self.name}] Setting up")
+        if self.verbose >= 1:
+            print(f"[BORGMQTT][{self.name}] Getting setup information")
 
         # Get all information from repository
         info = self._get_updates()
@@ -151,6 +155,9 @@ class Repository:
             "manufacturer": "Borg",
         }
         payload_shared = {"state_topic": self.state_topic, "device": device}
+
+        if self.verbose >= 1:
+            print(f"[BORGMQTT][{self.name}] Sending MQTT setup msgs")
 
         for key in info.keys():
             topic = f"homeassistant/sensor/{self.slug}/{key}/config"

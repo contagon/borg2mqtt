@@ -21,7 +21,12 @@ def run_borgmqtt():
         help="Path to load/save a configuration file. \
                 Defaults to $HOME/.config/borgmqtt/config.yml.",
     )
-    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        help="Verbose output. Repeat 1-3 times for varying levels.",
+    )
 
     subparsers = parser.add_subparsers(
         help="Type of operation to perform", dest="operation"
