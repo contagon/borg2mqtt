@@ -59,7 +59,7 @@ class Repository:
         return result
 
     def _get_updates(self):
-        """Get all info from borgmatic list & borgmatic info commands"""
+        """Ask borg for information and parse the results"""
 
         # Ask borg for all info
         repo_info = self._ask_borg("info")
@@ -93,7 +93,7 @@ class Repository:
         """Send all updated info over MQTT"""
 
         if self.verbose:
-            print(f"[BORGMQTT][{self.name} Updating")
+            print(f"[BORGMQTT][{self.name}]Updating")
 
         info = self._get_updates()
         publish.single(
@@ -109,7 +109,7 @@ class Repository:
         """Send MQTT autodiscovery message"""
 
         if self.verbose:
-            print(f"[BORGMQTT][{self.name} Setting up")
+            print(f"[BORGMQTT][{self.name}] Setting up")
 
         # Get all information from repository
         info = self._get_updates()
@@ -118,17 +118,17 @@ class Repository:
         payload_unique = {
             "chunks_total": {"name": "Chunks Total"},
             "chunks_unique": {"name": "Chunks Unique"},
-            "location": {"name": "Location"},
-            "id": {"name": "ID"},
+            "location": {"name": "Location", "enabled_by_default": False},
+            "id": {"name": "ID", "enabled_by_default": False},
             "most_recent": {"name": "Timestamp", "device_class": "timestamp"},
             "num_backups": {"name": "Total Backups"},
             "size_dedup": {
-                "name": "Deduplicated Size",
+                "name": "Dedup Size",
                 "device_class": "data_size",
                 "unit_of_meas": "GB",
             },
             "size_dedup_comp": {
-                "name": "Compressed Deduplicated Size",
+                "name": "Dedup Compressed Size",
                 "device_class": "data_size",
                 "unit_of_meas": "GB",
             },
