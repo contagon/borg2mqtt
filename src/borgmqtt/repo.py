@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import time
 from dataclasses import dataclass
 from pprint import pprint
 
@@ -65,6 +66,12 @@ class Repository:
         repo_info = self._ask_borg("info")
         repo_list = self._ask_borg("list")
 
+        # Time is returned in local time,
+        # but is missing the timezone offset on the stamp
+        # https://stackoverflow.com/a/3168394
+        is_dst = time.daylight and time.localtime().tm_isdst > 0
+        utc_offset = int((time.altzone if is_dst else time.timezone) / (3600))
+
         # Parse through it all
         info = {
             "location": repo_info["repository"]["location"],
@@ -84,7 +91,7 @@ class Repository:
                 float(repo_info["cache"]["stats"]["total_csize"]) / 10**12, 2
             ),
             "num_backups": len(repo_list["archives"]),
-            "most_recent": repo_list["archives"][-1]["time"] + "-04:00",
+            "most_recent": repo_list["archives"][-1]["time"] + f"-{utc_offset:02d}:00",
         }
 
         return info
