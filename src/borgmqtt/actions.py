@@ -17,7 +17,7 @@ def parse(args) -> tuple[list[Repository], MQTTSettings]:
 
     mqtt = MQTTSettings(**config["mqtt"])
 
-    repos = [Repository(**i) for i in config["repos"]]
+    repos = [Repository(verbose=args.verbose, **i) for i in config["repos"]]
 
     if args.operation == "update" and args.name is not None:
         repos = [r for r in repos if r.name == args.name]

@@ -38,6 +38,7 @@ classifiers = [  # Optional
 dependencies = [
   "paho-mqtt", 
   "platformdirs", 
+  "pprint",
   "python-slugify",
 ]
 

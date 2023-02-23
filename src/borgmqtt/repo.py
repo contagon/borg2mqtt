@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 from dataclasses import dataclass
+from pprint import pprint
 
 import paho.mqtt.publish as publish
 from slugify import slugify
@@ -19,6 +20,7 @@ class MQTTSettings:
 class Repository:
     repo: str
     key: str
+    verbose: bool = False
     name: str = None
 
     def __post_init__(self):
@@ -44,8 +46,16 @@ class Repository:
             "--json",
         ]
 
+        if self.verbose:
+            print(f"[BORGMQTT][{self.name}] Running {' '.join(arguments)}")
+
         result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env)
         result = json.loads(result.stdout)
+
+        if self.verbose:
+            print("[BORGMQTT][{self.name}] Got back")
+            pprint(result)
+
         return result
 
     def _get_updates(self):
@@ -81,6 +91,10 @@ class Repository:
 
     def update(self, mqtt: MQTTSettings):
         """Send all updated info over MQTT"""
+
+        if self.verbose:
+            print(f"[BORGMQTT][{self.name} Updating")
+
         info = self._get_updates()
         publish.single(
             self.state_topic,
@@ -93,6 +107,9 @@ class Repository:
 
     def setup(self, mqtt: MQTTSettings):
         """Send MQTT autodiscovery message"""
+
+        if self.verbose:
+            print(f"[BORGMQTT][{self.name} Setting up")
 
         # Get all information from repository
         info = self._get_updates()

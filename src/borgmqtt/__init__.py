@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from platformdirs import user_config_dir
 
@@ -11,14 +12,16 @@ def run_borgmqtt():
         prog="borgmqtt",
         description="Send borg repository settings over mqtt",
     )
+    default_path = os.path.join(user_config_dir(APP_NAME), "config.yml")
     parser.add_argument(
         "-c",
         "--config",
-        default=user_config_dir(APP_NAME),
+        default=default_path,
         type=str,
         help="Path to load/save a configuration file. \
                 Defaults to $HOME/.config/borgmqtt/config.yml.",
     )
+    parser.add_argument("-v", "--verbose", action="store_true")
 
     subparsers = parser.add_subparsers(
         help="Type of operation to perform", dest="operation"
