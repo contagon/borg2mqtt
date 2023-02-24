@@ -28,8 +28,12 @@ class Repository:
     units: str = "GB"
 
     def __post_init__(self):
+        # Clean up arguments
         if self.units not in UNITS.keys():
             raise ValueError(f"Unknown units {self.units} were used")
+
+        if self.verbose is None:
+            self.verbose = 0
 
         # Parse name
         if self.name is None:
