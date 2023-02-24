@@ -23,6 +23,7 @@ repos:
     # Optional
     key: ""
     # Optional, choose one of kB, MB, GB, TB. Defaults to GB.
+    units: GB
 """
 
 
