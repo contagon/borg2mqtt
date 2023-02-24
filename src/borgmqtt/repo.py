@@ -8,6 +8,8 @@ from pprint import pprint
 import paho.mqtt.publish as publish
 from slugify import slugify
 
+from .const import UNITS
+
 
 @dataclass
 class MQTTSettings:
@@ -23,8 +25,12 @@ class Repository:
     key: str = ""
     verbose: int = 0
     name: str = None
+    units: str = "GB"
 
     def __post_init__(self):
+        if self.units not in UNITS.keys():
+            raise ValueError(f"Unknown units {self.units} were used")
+
         # Parse name
         if self.name is None:
             self.name = self.repo
@@ -79,16 +85,17 @@ class Repository:
             "chunks_unique": repo_info["cache"]["stats"]["total_unique_chunks"],
             "chunks_total": repo_info["cache"]["stats"]["total_chunks"],
             "size_dedup": round(
-                float(repo_info["cache"]["stats"]["unique_size"]) / 10**9, 2
+                float(repo_info["cache"]["stats"]["unique_size"]) * UNITS[self.units], 2
             ),
             "size_dedup_comp": round(
-                float(repo_info["cache"]["stats"]["unique_csize"]) / 10**9, 2
+                float(repo_info["cache"]["stats"]["unique_csize"]) * UNITS[self.units],
+                2,
             ),
             "size_og": round(
-                float(repo_info["cache"]["stats"]["total_size"]) / 10**12, 2
+                float(repo_info["cache"]["stats"]["total_size"]) * UNITS[self.units], 2
             ),
             "size_og_comp": round(
-                float(repo_info["cache"]["stats"]["total_csize"]) / 10**12, 2
+                float(repo_info["cache"]["stats"]["total_csize"]) * UNITS[self.units], 2
             ),
             "num_backups": len(repo_list["archives"]),
             "most_recent": repo_list["archives"][-1]["time"] + f"-{utc_offset:02d}:00",
@@ -136,22 +143,22 @@ class Repository:
             "size_dedup": {
                 "name": "Dedup Size",
                 "device_class": "data_size",
-                "unit_of_meas": "GB",
+                "unit_of_meas": self.units,
             },
             "size_dedup_comp": {
                 "name": "Dedup Compressed Size",
                 "device_class": "data_size",
-                "unit_of_meas": "GB",
+                "unit_of_meas": self.units,
             },
             "size_og": {
                 "name": "Original Size",
                 "device_class": "data_size",
-                "unit_of_meas": "TB",
+                "unit_of_meas": self.units,
             },
             "size_og_comp": {
                 "name": "Original Compressed Size",
                 "device_class": "data_size",
-                "unit_of_meas": "TB",
+                "unit_of_meas": self.units,
             },
         }
 

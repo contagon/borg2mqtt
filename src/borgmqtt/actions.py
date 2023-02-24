@@ -17,11 +17,12 @@ mqtt:
 repos:
     # Required
   - repo: user@address:/path/to/backup
-    # Optional, efaults to the same as repo if not specified
+    # Optional, defaults to the same as repo if not specified
     # This will be used to make entity_ids in HA
     name: Local Data
     # Optional
     key: ""
+    # Optional, choose one of kB, MB, GB, TB. Defaults to GB.
 """
 
 
