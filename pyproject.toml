@@ -38,8 +38,8 @@ classifiers = [  # Optional
 dependencies = [
   "paho-mqtt", 
   "platformdirs", 
-  "pprint",
   "python-slugify",
+  "pyyaml",
 ]
 
 [project.optional-dependencies]
@@ -47,9 +47,9 @@ dev = ["check-manifest", "pre-commit"]
 test = ["pytest"]
 
 [project.urls]
-"Homepage" = "https://github.com/contagon/mullvad-async"
-"Bug Reports" = "https://github.com/contagon/mullvad-async/issues"
-"Source" = "https://github.com/contagon/mullvad-async/"
+"Homepage" = "https://github.com/contagon/borgmqtt"
+"Bug Reports" = "https://github.com/contagon/borgmqtt/issues"
+"Source" = "https://github.com/contagon/borgmqtt"
 
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
