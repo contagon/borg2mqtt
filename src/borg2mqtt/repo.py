@@ -8,7 +8,7 @@ from pprint import pprint
 import paho.mqtt.publish as publish
 from slugify import slugify
 
-from .const import UNITS
+from .const import APP_NAME, UNITS
 
 
 @dataclass
@@ -58,13 +58,13 @@ class Repository:
         ]
 
         if self.verbose >= 2:
-            print(f"[BORGMQTT][{self.name}] Running {' '.join(arguments)}")
+            print(f"[{APP_NAME}][{self.name}] Running {' '.join(arguments)}")
 
         result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env)
         result = json.loads(result.stdout)
 
         if self.verbose >= 3:
-            print("[BORGMQTT][{self.name}] Got back")
+            print(f"[{APP_NAME}][{self.name}] Got back")
             pprint(result)
 
         return result
@@ -111,12 +111,12 @@ class Repository:
         """Send all updated info over MQTT"""
 
         if self.verbose >= 1:
-            print(f"[BORGMQTT][{self.name}] Getting update information")
+            print(f"[{APP_NAME}][{self.name}] Getting update information")
 
         info = self._get_updates()
 
         if self.verbose >= 1:
-            print(f"[BORGMQTT][{self.name}] Sending MQTT update")
+            print(f"[{APP_NAME}][{self.name}] Sending MQTT update")
 
         publish.single(
             self.state_topic,
@@ -131,7 +131,7 @@ class Repository:
         """Send MQTT autodiscovery message"""
 
         if self.verbose >= 1:
-            print(f"[BORGMQTT][{self.name}] Getting setup information")
+            print(f"[{APP_NAME}][{self.name}] Getting setup information")
 
         # Get all information from repository
         info = self._get_updates()
@@ -175,7 +175,7 @@ class Repository:
         payload_shared = {"state_topic": self.state_topic, "device": device}
 
         if self.verbose >= 1:
-            print(f"[BORGMQTT][{self.name}] Sending MQTT setup msgs")
+            print(f"[{APP_NAME}][{self.name}] Sending MQTT setup msgs")
 
         for key in info.keys():
             topic = f"homeassistant/sensor/{self.slug}/{key}/config"

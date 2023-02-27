@@ -7,9 +7,9 @@ from . import actions
 from .const import APP_NAME
 
 
-def run_borgmqtt():
+def run_borg2mqtt():
     parser = argparse.ArgumentParser(
-        prog="borgmqtt",
+        prog="borg2mqtt",
         description="Send borg repository settings over mqtt",
     )
     default_path = os.path.join(user_config_dir(APP_NAME), "config.yml")
@@ -19,7 +19,7 @@ def run_borgmqtt():
         default=default_path,
         type=str,
         help="Path to load/save a configuration file. \
-                Defaults to $HOME/.config/borgmqtt/config.yml.",
+                Defaults to $HOME/.config/borg2mqtt/config.yml.",
     )
     parser.add_argument(
         "-v",
@@ -68,4 +68,4 @@ def run_borgmqtt():
 
 
 if __name__ == "__main__":
-    run_borgmqtt()
+    run_borg2mqtt()

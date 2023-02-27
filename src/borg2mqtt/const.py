@@ -1,4 +1,4 @@
-APP_NAME = "borgmqtt"
+APP_NAME = "borg2mqtt"
 
 # Conversion from bytes -> unit
 UNITS = {

@@ -2,6 +2,7 @@ import os
 
 import yaml
 
+from .const import APP_NAME
 from .repo import MQTTSettings, Repository
 
 EXAMPLE_CONFIG = """
@@ -64,7 +65,7 @@ def generate(path: str):
         os.makedirs(directory)
 
     # Save example config
-    print(f"[BORGMQTT] Making config file at {path}")
+    print(f"[{APP_NAME}] Making config file at {path}")
     with open(path, "w") as f:
         f.write(EXAMPLE_CONFIG)
 

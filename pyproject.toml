@@ -1,5 +1,5 @@
 [project]
-name = "borgmqtt"
+name = "borg2mqtt"
 version = "0.1.1"
 description = "Send borg backup updates over MQTT"
 readme = "README.md"
@@ -47,13 +47,13 @@ dev = ["check-manifest", "pre-commit"]
 test = ["pytest"]
 
 [project.urls]
-"Homepage" = "https://github.com/contagon/borgmqtt"
-"Bug Reports" = "https://github.com/contagon/borgmqtt/issues"
-"Source" = "https://github.com/contagon/borgmqtt"
+"Homepage" = "https://github.com/contagon/borg2mqtt"
+"Bug Reports" = "https://github.com/contagon/borg2mqtt/issues"
+"Source" = "https://github.com/contagon/borg2mqtt"
 
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-borgmqtt = "borgmqtt:run_borgmqtt"
+borg2mqtt = "borg2mqtt:run_borg2mqtt"
