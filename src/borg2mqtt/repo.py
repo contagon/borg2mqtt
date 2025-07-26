@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import time
+import datetime
 from dataclasses import dataclass
 from pprint import pprint
 
@@ -23,6 +24,7 @@ class MQTTSettings:
 class Repository:
     repo: str
     key: str = ""
+    rsh: str = ""
     verbose: int = 0
     name: str = None
     units: str = "GB"
@@ -34,6 +36,9 @@ class Repository:
 
         if self.verbose is None:
             self.verbose = 0
+        
+        if self.rsh is None:
+            self.rsh = ""
 
         # Parse name
         if self.name is None:
@@ -57,6 +62,9 @@ class Repository:
             "--json",
         ]
 
+        if self.rsh != "":
+            env["BORG_RSH"] = self.rsh
+
         if self.verbose >= 2:
             print(f"[{APP_NAME}][{self.name}] Running {' '.join(arguments)}")
 
@@ -76,11 +84,7 @@ class Repository:
         repo_info = self._ask_borg("info")
         repo_list = self._ask_borg("list")
 
-        # Time is returned in local time,
-        # but is missing the timezone offset on the stamp
-        # https://stackoverflow.com/a/3168394
-        is_dst = time.daylight and time.localtime().tm_isdst > 0
-        utc_offset = int((time.altzone if is_dst else time.timezone) / (3600))
+        date_format_code = "%Y-%m-%dT%H:%M:%S.%f"
 
         # Parse through it all
         info = {
@@ -102,9 +106,11 @@ class Repository:
                 float(repo_info["cache"]["stats"]["total_csize"]) * UNITS[self.units], 2
             ),
             "num_backups": len(repo_list["archives"]),
-            "most_recent": repo_list["archives"][-1]["time"] + f"-{utc_offset:02d}:00",
+            # Time is returned in local time,
+            # but is missing the timezone offset on the stamp
+            # HA needs timestamp in ISO 8601 format with timezone
+            "most_recent": datetime.datetime.strptime(repo_list["repository"]["last_modified"], date_format_code).astimezone().isoformat(),
         }
-
         return info
 
     def update(self, mqtt: MQTTSettings):
@@ -117,6 +123,9 @@ class Repository:
 
         if self.verbose >= 1:
             print(f"[{APP_NAME}][{self.name}] Sending MQTT update")
+        
+        if self.verbose >= 2:
+            print(f"[{APP_NAME}][{self.name}] Payload for send to MQTT: {json.dumps(info)}")
 
         publish.single(
             self.state_topic,
