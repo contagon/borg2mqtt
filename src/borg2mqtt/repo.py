@@ -28,28 +28,22 @@ class Repository:
     units: str = "GB"
 
     def __post_init__(self):
-        # Clean up arguments
         if self.units not in UNITS.keys():
             raise ValueError(f"Unknown units {self.units} were used")
 
         if self.verbose is None:
             self.verbose = 0
 
-        # Parse name
         if self.name is None:
             self.name = self.repo
 
-        # Make state topic
         self.slug = slugify(self.name, separator="_")
         self.state_topic = f"borg/{self.slug}/state"
 
     def _ask_borg(self, command):
-        """Poll borg for a response"""
-
         env = os.environ.copy()
         env["BORG_PASSPHRASE"] = self.key
 
-        # Get info about all repos
         arguments = [
             "borg",
             command,
@@ -70,19 +64,12 @@ class Repository:
         return result
 
     def _get_updates(self):
-        """Ask borg for information and parse the results"""
-
-        # Ask borg for all info
         repo_info = self._ask_borg("info")
         repo_list = self._ask_borg("list")
 
-        # Time is returned in local time,
-        # but is missing the timezone offset on the stamp
-        # https://stackoverflow.com/a/3168394
         is_dst = time.daylight and time.localtime().tm_isdst > 0
         utc_offset = int((time.altzone if is_dst else time.timezone) / (3600))
 
-        # Parse through it all
         info = {
             "location": repo_info["repository"]["location"],
             "id": repo_info["repository"]["id"],
@@ -108,7 +95,7 @@ class Repository:
         return info
 
     def update(self, mqtt: MQTTSettings):
-        """Send all updated info over MQTT"""
+        """Send all updated info over MQTT, each field in its own topic"""
 
         if self.verbose >= 1:
             print(f"[{APP_NAME}][{self.name}] Getting update information")
@@ -118,25 +105,25 @@ class Repository:
         if self.verbose >= 1:
             print(f"[{APP_NAME}][{self.name}] Sending MQTT update")
 
-        publish.single(
-            self.state_topic,
-            payload=json.dumps(info),
-            hostname=mqtt.host,
-            port=mqtt.port,
-            auth={"username": mqtt.user, "password": mqtt.password},
-            retain=True,
-        )
+        for key, value in info.items():
+            topic = f"borg/{self.slug}/{key}"  # jedes Feld bekommt eigenes Topic
+            publish.single(
+                topic,
+                payload=value,
+                hostname=mqtt.host,
+                port=mqtt.port,
+                auth={"username": mqtt.user, "password": mqtt.password},
+                retain=True,
+            )
+            if self.verbose >= 2:
+                print(f"[{APP_NAME}][{self.name}] Sent {topic} -> {value}")
 
     def setup(self, mqtt: MQTTSettings):
-        """Send MQTT autodiscovery message"""
-
         if self.verbose >= 1:
             print(f"[{APP_NAME}][{self.name}] Getting setup information")
 
-        # Get all information from repository
         info = self._get_updates()
 
-        # Things unique to each sensor
         payload_unique = {
             "chunks_total": {"name": "Chunks Total"},
             "chunks_unique": {"name": "Chunks Unique"},
