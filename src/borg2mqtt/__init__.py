@@ -6,7 +6,7 @@ from platformdirs import user_config_dir
 from . import actions
 from .const import APP_NAME
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 
 def run_borg2mqtt():
