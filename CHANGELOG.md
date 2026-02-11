@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/contagon/borg2mqtt/compare/v0.2.0...v0.2.1) (2026-02-11)
+
+
+### Bug Fixes
+
+* Force release please to run ([9756887](https://github.com/contagon/borg2mqtt/commit/9756887492258660e0bd0566a3ee3525e7b7ad13))
+
 ## [0.2.0](https://github.com/contagon/borg2mqtt/compare/v0.1.2...v0.2.0) (2026-02-11)
 
 
