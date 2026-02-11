@@ -189,7 +189,7 @@ class Repository:
         for key in info.keys():
             topic = f"homeassistant/sensor/{self.slug}/{key}/config"
             payload = {**payload_unique[key], **payload_shared}
-            payload["object_id"] = f"{self.slug}_{key}"
+            payload["default_entity_id"] = f"{self.slug}_{key}"
             payload["unique_id"] = f"{self.slug}_{key}"
             payload["value_template"] = f"{{{{value_json.{key}}}}}"
 

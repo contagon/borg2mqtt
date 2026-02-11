@@ -27,6 +27,7 @@ def run_borg2mqtt():
         "-v",
         "--verbose",
         action="count",
+        default=0,
         help="Verbose output. Repeat 1-3 times for varying levels.",
     )
 
