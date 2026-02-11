@@ -6,6 +6,8 @@ from platformdirs import user_config_dir
 from . import actions
 from .const import APP_NAME
 
+__version__ = "0.1.2"
+
 
 def run_borg2mqtt():
     parser = argparse.ArgumentParser(
