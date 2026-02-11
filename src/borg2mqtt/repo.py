@@ -81,24 +81,20 @@ class Repository:
         date_format_code = "%Y-%m-%dT%H:%M:%S.%f"
 
         # Parse through it all
+        scale = UNITS[self.units]
+        cache_stats = repo_info["cache"]["stats"]
         info = {
             "location": repo_info["repository"]["location"],
             "id": repo_info["repository"]["id"],
-            "chunks_unique": repo_info["cache"]["stats"]["total_unique_chunks"],
-            "chunks_total": repo_info["cache"]["stats"]["total_chunks"],
-            "size_dedup": round(
-                float(repo_info["cache"]["stats"]["unique_size"]) * UNITS[self.units], 2
-            ),
+            "chunks_unique": cache_stats["total_unique_chunks"],
+            "chunks_total": cache_stats["total_chunks"],
+            "size_dedup": round(float(cache_stats["unique_size"]) * scale, 8),
             "size_dedup_comp": round(
-                float(repo_info["cache"]["stats"]["unique_csize"]) * UNITS[self.units],
-                2,
+                float(cache_stats["unique_csize"]) * scale,
+                8,
             ),
-            "size_og": round(
-                float(repo_info["cache"]["stats"]["total_size"]) * UNITS[self.units], 2
-            ),
-            "size_og_comp": round(
-                float(repo_info["cache"]["stats"]["total_csize"]) * UNITS[self.units], 2
-            ),
+            "size_og": round(float(cache_stats["total_size"]) * scale, 8),
+            "size_og_comp": round(float(cache_stats["total_csize"]) * scale, 8),
             "num_backups": len(repo_list["archives"]),
             # Time is returned in local time,
             # but is missing the timezone offset on the stamp
@@ -189,7 +185,7 @@ class Repository:
         for key in info.keys():
             topic = f"homeassistant/sensor/{self.slug}/{key}/config"
             payload = {**payload_unique[key], **payload_shared}
-            payload["object_id"] = f"{self.slug}_{key}"
+            payload["default_entity_id"] = f"{self.slug}_{key}"
             payload["unique_id"] = f"{self.slug}_{key}"
             payload["value_template"] = f"{{{{value_json.{key}}}}}"
 
