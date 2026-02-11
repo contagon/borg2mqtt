@@ -1,10 +1,10 @@
 import json
 import os
 import subprocess
-import time
 import datetime
 from dataclasses import dataclass
 from pprint import pprint
+from typing import Literal, Optional
 
 import paho.mqtt.publish as publish
 from slugify import slugify
@@ -26,19 +26,13 @@ class Repository:
     key: str = ""
     rsh: str = ""
     verbose: int = 0
-    name: str = None
+    name: Optional[str] = None
     units: str = "GB"
 
     def __post_init__(self):
         # Clean up arguments
         if self.units not in UNITS.keys():
             raise ValueError(f"Unknown units {self.units} were used")
-
-        if self.verbose is None:
-            self.verbose = 0
-        
-        if self.rsh is None:
-            self.rsh = ""
 
         # Parse name
         if self.name is None:
@@ -48,7 +42,7 @@ class Repository:
         self.slug = slugify(self.name, separator="_")
         self.state_topic = f"borg/{self.slug}/state"
 
-    def _ask_borg(self, command):
+    def _ask_borg(self, command: Literal["info", "list"]):
         """Poll borg for a response"""
 
         env = os.environ.copy()
@@ -109,7 +103,11 @@ class Repository:
             # Time is returned in local time,
             # but is missing the timezone offset on the stamp
             # HA needs timestamp in ISO 8601 format with timezone
-            "most_recent": datetime.datetime.strptime(repo_list["repository"]["last_modified"], date_format_code).astimezone().isoformat(),
+            "most_recent": datetime.datetime.strptime(
+                repo_list["repository"]["last_modified"], date_format_code
+            )
+            .astimezone()
+            .isoformat(),
         }
         return info
 
@@ -123,9 +121,11 @@ class Repository:
 
         if self.verbose >= 1:
             print(f"[{APP_NAME}][{self.name}] Sending MQTT update")
-        
+
         if self.verbose >= 2:
-            print(f"[{APP_NAME}][{self.name}] Payload for send to MQTT: {json.dumps(info)}")
+            print(
+                f"[{APP_NAME}][{self.name}] Payload for send to MQTT: {json.dumps(info)}"
+            )
 
         publish.single(
             self.state_topic,

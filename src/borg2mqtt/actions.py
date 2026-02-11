@@ -1,4 +1,5 @@
-import os
+from argparse import Namespace
+from pathlib import Path
 
 import yaml
 
@@ -25,10 +26,12 @@ repos:
     key: ""
     # Optional, choose one of kB, MB, GB, TB. Defaults to GB.
     units: GB
+    # Optional, extra arguments to borg, e.g. "ssh -p 1234"
+    rsh: ""
 """
 
 
-def parse(args) -> tuple[list[Repository], MQTTSettings]:
+def parse(args: Namespace) -> tuple[list[Repository], MQTTSettings]:
     with open(args.config) as f:
         config = yaml.safe_load(f)
 
@@ -52,17 +55,17 @@ def parse(args) -> tuple[list[Repository], MQTTSettings]:
     return repos, mqtt
 
 
-def generate(path: str):
+def generate(path: Path):
     # Make sure we're not overriding anything
-    if os.path.exists(path):
+    if path.exists():
         raise ValueError(
             f"A file exists at {path} already, remove it to make a new one"
         )
 
     # Make directory to put config file in
-    directory = os.path.dirname(path)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    directory = path.parent
+    if not directory.exists():
+        directory.mkdir(parents=True)
 
     # Save example config
     print(f"[{APP_NAME}] Making config file at {path}")
