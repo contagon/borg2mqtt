@@ -41,7 +41,7 @@ jobs:
     if: ${{ fromJSON(needs.release.outputs.releases_created) }}
     environment: 
       name: pypi
-      url: https://pypi.org/p/bor2mqtt
+      url: https://pypi.org/p/borg2mqtt
     permissions:
       id-token: write
     steps:
