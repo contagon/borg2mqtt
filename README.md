@@ -42,6 +42,9 @@ repos:
     name: Local Data
     # Optional
     key: ""
+    # Optional, will use the given ssh command
+    # Can be used to authenticate with a ssh key (ssh -i /path-to-key)
+    rsh: ""
     # Optional, choose one of kB, MB, GB, TB. Defaults to GB.
     units: GB
 ```
