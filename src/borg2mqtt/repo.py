@@ -1,7 +1,7 @@
+import datetime
 import json
 import os
 import subprocess
-import datetime
 from dataclasses import dataclass
 from pprint import pprint
 from typing import Literal, Optional
@@ -62,7 +62,9 @@ class Repository:
         if self.verbose >= 2:
             print(f"[{APP_NAME}][{self.name}] Running {' '.join(arguments)}")
 
-        result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env)
+        result = subprocess.run(
+            arguments, stdout=subprocess.PIPE, env=env, check=True
+        )
         result = json.loads(result.stdout)
 
         if self.verbose >= 3:

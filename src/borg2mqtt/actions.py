@@ -1,5 +1,8 @@
 from argparse import Namespace
+from collections.abc import Callable
 from pathlib import Path
+import subprocess
+import sys
 
 import yaml
 
@@ -73,11 +76,30 @@ def generate(path: Path):
         f.write(EXAMPLE_CONFIG)
 
 
+def run(
+    repos: list[Repository],
+    mqtt: MQTTSettings,
+    operation: Callable[[Repository, MQTTSettings], None],
+):
+    failed = False
+    for repo in repos:
+        try:
+            operation(repo, mqtt)
+        except subprocess.CalledProcessError as error:
+            failed = True
+            print(
+                f"[{APP_NAME}][{repo.name}] Borg exited with status "
+                f"{error.returncode}; skipping repository",
+                file=sys.stderr,
+            )
+
+    if failed:
+        raise SystemExit(1)
+
+
 def setup(repos: list[Repository], mqtt: MQTTSettings):
-    for r in repos:
-        r.setup(mqtt)
+    run(repos, mqtt, Repository.setup)
 
 
 def update(repos: list[Repository], mqtt: MQTTSettings):
-    for r in repos:
-        r.update(mqtt)
+    run(repos, mqtt, Repository.update)

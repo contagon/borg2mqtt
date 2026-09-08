@@ -27,3 +27,5 @@ jobs:
         run: uv sync --dev --verbose --all-extras
       - name: Run basedpyright
         run: uv run basedpyright
+      - name: Run tests
+        run: uv run pytest
