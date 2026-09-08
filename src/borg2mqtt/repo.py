@@ -1,12 +1,12 @@
+import datetime
 import json
 import os
 import subprocess
-import datetime
 from dataclasses import dataclass
 from pprint import pprint
-from typing import Literal, Optional
+from typing import Literal
 
-import paho.mqtt.publish as publish
+from paho.mqtt import publish
 from slugify import slugify
 
 from .const import APP_NAME, UNITS
@@ -26,12 +26,12 @@ class Repository:
     key: str = ""
     rsh: str = ""
     verbose: int = 0
-    name: Optional[str] = None
+    name: str | None = None
     units: str = "GB"
 
     def __post_init__(self):
         # Clean up arguments
-        if self.units not in UNITS.keys():
+        if self.units not in UNITS:
             raise ValueError(f"Unknown units {self.units} were used")
 
         # Parse name
@@ -62,7 +62,7 @@ class Repository:
         if self.verbose >= 2:
             print(f"[{APP_NAME}][{self.name}] Running {' '.join(arguments)}")
 
-        result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env)
+        result = subprocess.run(arguments, stdout=subprocess.PIPE, env=env, check=True)
         result = json.loads(result.stdout)
 
         if self.verbose >= 3:
@@ -182,7 +182,7 @@ class Repository:
         if self.verbose >= 1:
             print(f"[{APP_NAME}][{self.name}] Sending MQTT setup msgs")
 
-        for key in info.keys():
+        for key in info:
             topic = f"homeassistant/sensor/{self.slug}/{key}/config"
             payload = {**payload_unique[key], **payload_shared}
             payload["default_entity_id"] = f"{self.slug}_{key}"
