@@ -1,8 +1,8 @@
+import subprocess
+import sys
 from argparse import Namespace
 from collections.abc import Callable
 from pathlib import Path
-import subprocess
-import sys
 
 import yaml
 
