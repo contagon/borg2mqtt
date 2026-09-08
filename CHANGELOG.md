@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/contagon/borg2mqtt/compare/v0.2.1...v0.2.2) (2026-09-08)
+
+
+### Bug Fixes
+
+* Handle failing repos ([#11](https://github.com/contagon/borg2mqtt/issues/11)) ([1fe9324](https://github.com/contagon/borg2mqtt/commit/1fe9324e76f3d55a30ec6690c5976674aae3479b))
+
 ## [0.2.1](https://github.com/contagon/borg2mqtt/compare/v0.2.0...v0.2.1) (2026-02-11)
 
 
